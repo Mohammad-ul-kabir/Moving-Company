@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function QuoteCard() {
   const [moveType, setMoveType] = useState("");
@@ -21,9 +22,12 @@ export default function QuoteCard() {
     });
   };
 
+  const nav = useNavigate();
   const onSubmit = (e) => {
     e.preventDefault();
-    alert("Quote requested (mock).");
+    nav("/inquiry", {
+      state: { prefill: { moveType, pickup, delivery, hasDate, moveDate } },
+    });
   };
 
   return (

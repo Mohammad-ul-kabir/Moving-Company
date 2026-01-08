@@ -1,11 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminShell from "../../components/admin/AdminShell";
-import { saveInquiries } from "../../services/adminStore";
+import { getInquiries, saveInquiries } from "../../services/adminStore";
 
 const STATUSES = ["NEW", "QUOTED", "BOOKED", "CLOSED"];
 
 export default function Inquiries() {
-  const [inquiries, setInquiries] = useState([]);
+  // Read once on mount
+  const [inquiries, setInquiries] = useState(() => getInquiries());
+
+  // Subscribe to external changes (localStorage / tab focus)
+  useEffect(() => {
+    const sync = () => setInquiries(getInquiries());
+
+    // When you return to the tab, pull latest localStorage
+    window.addEventListener("focus", sync);
+
+    // When localStorage changes (works across tabs)
+    window.addEventListener("storage", sync);
+
+    // When visibility changes (optional extra)
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") sync();
+    });
+
+    return () => {
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("storage", sync);
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, []);
 
   const updateStatus = (id, status) => {
     const next = inquiries.map((i) => (i.id === id ? { ...i, status } : i));
@@ -15,7 +38,13 @@ export default function Inquiries() {
 
   return (
     <AdminShell title="Inquiries">
-      <div className="overflow-x-auto">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-slate-600">
+          Total: <span className="font-semibold">{inquiries.length}</span>
+        </p>
+      </div>
+
+      <div className="mt-4 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-slate-600">
             <tr className="border-b">
@@ -58,8 +87,7 @@ export default function Inquiries() {
             {inquiries.length === 0 && (
               <tr>
                 <td className="py-6 text-slate-600" colSpan={4}>
-                  No inquiries yet. When you build the customer Inquiry form,
-                  they will appear here.
+                  No inquiries yet.
                 </td>
               </tr>
             )}
