@@ -10,19 +10,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Customer */}
         <Route path="/" element={<Home />} />
         <Route path="/service-areas" element={<ServiceAreas />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/account" element={<Account />} />
 
-        {/* Uncomment when you create these pages */}
-        {/* <Route path="/inquiry" element={<Inquiry />} />
-        <Route path="/book" element={<Book />} />
-        <Route path="/success" element={<Success />} /> */}
-
-        {/* Admin */}
         <Route path="/admin/login" element={<Login />} />
 
         <Route
@@ -33,7 +23,6 @@ export default function App() {
             </RequireAdmin>
           }
         />
-
         <Route
           path="/admin/inquiries"
           element={
