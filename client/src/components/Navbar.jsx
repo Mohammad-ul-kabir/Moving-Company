@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+
 import logoImg from "../assets/blueline.jpg";
 
 const navLinkClass = ({ isActive }) =>
@@ -31,9 +32,12 @@ export default function Navbar() {
           </nav>
         </div>
 
-        <button className="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700">
+        <Link
+          to="/inquiry"
+          className="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700"
+        >
           Get a Quote
-        </button>
+        </Link>
       </div>
     </header>
   );

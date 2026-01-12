@@ -1,6 +1,6 @@
 const KEYS = {
   AREAS: "mc_admin_areas",
-  INQUIRIES: "mc_admin_inquiries",
+  INQUIRIES: "mc_inquiries",
   AUTH: "mc_admin_auth",
   BOOKINGS: "mc_admin_bookings",
 

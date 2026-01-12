@@ -1,53 +1,55 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { adminLogin, seedAdminData } from "../../services/adminStore";
+import { useLocation, useNavigate } from "react-router-dom";
+import { adminLogin } from "../../services/authApi";
 
-export default function Login() {
+export default function AdminLogin() {
   const nav = useNavigate();
-  const [email, setEmail] = useState("admin@movingco.com");
-  const [password, setPassword] = useState("admin123");
+  const location = useLocation();
+  const from = location.state?.from || "/admin/dashboard";
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setErr("");
-
-    if (!email.trim() || !password.trim()) {
-      setErr("Email and password are required.");
-      return;
+    setLoading(true);
+    try {
+      await adminLogin(email, password);
+      nav(from, { replace: true });
+    } catch (e) {
+      setErr(e?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-
-    seedAdminData(); // seed mock data once
-    adminLogin(email.trim()); // mock login
-    nav("/admin/areas");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-md bg-white border rounded-2xl shadow-sm p-6"
-      >
+      <div className="w-full max-w-md bg-white border rounded-2xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-slate-900">Admin Login</h1>
         <p className="text-slate-600 mt-2 text-sm">
-          Mock login for now. Backend auth comes later.
+          Sign in to manage service areas and inquiries.
         </p>
 
         {err && (
-          <div className="mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm p-3">
             {err}
           </div>
         )}
 
-        <div className="mt-5 space-y-4">
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div>
             <label className="text-sm font-medium text-slate-700">Email</label>
             <input
-              className="mt-1 w-full rounded-xl border px-3 py-2"
+              type="email"
+              className="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              type="email"
               required
+              placeholder="admin@movingco.com"
             />
           </div>
 
@@ -56,19 +58,27 @@ export default function Login() {
               Password
             </label>
             <input
-              className="mt-1 w-full rounded-xl border px-3 py-2"
+              type="password"
+              className="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              type="password"
               required
+              placeholder="••••••••"
             />
           </div>
 
-          <button className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
-            Login
+          <button
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 disabled:opacity-60"
+          >
+            {loading ? "Signing in..." : "Sign In"}
           </button>
-        </div>
-      </form>
+
+          <div className="text-xs text-slate-500">
+            (Mock auth for now) Later we’ll connect this to backend JWT login.
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

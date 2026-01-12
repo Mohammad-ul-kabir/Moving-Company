@@ -49,7 +49,7 @@ export default function Inquiries() {
           <thead className="text-left text-slate-600">
             <tr className="border-b">
               <th className="py-3">Customer</th>
-              <th className="py-3">Route</th>
+              <th className="py-3 ddd">Route</th>
               <th className="py-3">Move Date</th>
               <th className="py-3">Status</th>
             </tr>

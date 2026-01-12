@@ -2,7 +2,7 @@ export default function Footer() {
   return (
     <footer className="mt-16 border-t bg-white">
       <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {/* Brand */}
           <div>
             <div className="font-semibold text-slate-900 text-lg">MovingCo</div>
@@ -33,27 +33,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support */}
-          <div>
-            <div className="font-semibold text-slate-900">Support</div>
-            <ul className="mt-3 space-y-2 text-sm text-slate-600">
-              <li>Mon–Sun: 9:00–18:00</li>
-              <li>
-                <a className="hover:text-slate-900" href="tel:+440000000000">
-                  +44 0000 000000
-                </a>
-              </li>
-              <li>
-                <a
-                  className="hover:text-slate-900"
-                  href="mailto:support@movingco.com"
-                >
-                  support@movingco.com
-                </a>
-              </li>
-            </ul>
-          </div>
-
           {/* CTA */}
           <div>
             <div className="font-semibold text-slate-900">Get started</div>
@@ -61,7 +40,7 @@ export default function Footer() {
               Check service availability and book in minutes.
             </p>
             <a
-              href="/book"
+              href="/inquiry"
               className="inline-flex mt-4 px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700"
             >
               Get a Quote
