@@ -2,6 +2,8 @@ const KEYS = {
   AREAS: "mc_admin_areas",
   INQUIRIES: "mc_admin_inquiries",
   AUTH: "mc_admin_auth",
+  BOOKINGS: "mc_admin_bookings",
+
 };
 
 function read(key, fallback) {
@@ -78,3 +80,18 @@ export function getInquiries() {
 export function saveInquiries(inquiries) {
   write(KEYS.INQUIRIES, inquiries);
 }
+
+/** BOOKINGS */
+export function getBookings() {
+  return read(KEYS.BOOKINGS, []);
+}
+
+export function saveBookings(bookings) {
+  write(KEYS.BOOKINGS, bookings);
+}
+
+const existingBookings = read(KEYS.BOOKINGS, null);
+if (!existingBookings) {
+  write(KEYS.BOOKINGS, []);
+}
+

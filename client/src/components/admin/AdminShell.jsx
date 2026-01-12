@@ -23,6 +23,10 @@ export default function AdminShell({ title, children }) {
               <NavLink to="/admin/inquiries" className={linkClass}>
                 Inquiries
               </NavLink>
+              <NavLink to="/admin/bookings" className={linkClass}>
+                Bookings
+              </NavLink>
+
               <a
                 href="/"
                 className="block px-3 py-2 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100"
