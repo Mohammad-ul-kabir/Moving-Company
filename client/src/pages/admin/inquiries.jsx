@@ -1,39 +1,51 @@
 import { useEffect, useState } from "react";
 import AdminShell from "../../components/admin/AdminShell";
-import { getInquiries, saveInquiries } from "../../services/adminStore";
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const STATUSES = ["NEW", "QUOTED", "BOOKED", "CLOSED"];
 
 export default function Inquiries() {
-  // Read once on mount
-  const [inquiries, setInquiries] = useState(() => getInquiries());
+  const [inquiries, setInquiries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Subscribe to external changes (localStorage / tab focus)
+  const load = async () => {
+    try {
+      setError("");
+      setLoading(true);
+
+      const res = await fetch(`${API}/api/inquiries?t=${Date.now()}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(`HTTP ${res.status}: ${txt}`);
+      }
+
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : [];
+      setInquiries(list);
+    } catch (e) {
+      setError(e.message || "Failed to load inquiries");
+      setInquiries([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const sync = () => setInquiries(getInquiries());
-
-    // When you return to the tab, pull latest localStorage
-    window.addEventListener("focus", sync);
-
-    // When localStorage changes (works across tabs)
-    window.addEventListener("storage", sync);
-
-    // When visibility changes (optional extra)
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") sync();
-    });
-
-    return () => {
-      window.removeEventListener("focus", sync);
-      window.removeEventListener("storage", sync);
-      document.removeEventListener("visibilitychange", sync);
-    };
+    load();
   }, []);
 
-  const updateStatus = (id, status) => {
-    const next = inquiries.map((i) => (i.id === id ? { ...i, status } : i));
-    setInquiries(next);
-    saveInquiries(next);
+  const updateStatus = async (id, status) => {
+    await fetch(`${API}/api/inquiries/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    await load();
   };
 
   return (
@@ -42,58 +54,78 @@ export default function Inquiries() {
         <p className="text-sm text-slate-600">
           Total: <span className="font-semibold">{inquiries.length}</span>
         </p>
+
+        <button
+          onClick={load}
+          className="px-4 py-2 rounded-xl bg-slate-100 font-semibold hover:bg-slate-200"
+        >
+          Reload
+        </button>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-left text-slate-600">
-            <tr className="border-b">
-              <th className="py-3">Customer</th>
-              <th className="py-3 ddd">Route</th>
-              <th className="py-3">Move Date</th>
-              <th className="py-3">Status</th>
-            </tr>
-          </thead>
+      {error && (
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
 
-          <tbody>
-            {inquiries.map((i) => (
-              <tr key={i.id} className="border-b">
-                <td className="py-3">
-                  <div className="font-medium text-slate-900">{i.name}</div>
-                  <div className="text-slate-600 text-xs">{i.phone}</div>
-                </td>
-                <td className="py-3">
-                  <div className="text-slate-900 font-medium">
-                    {i.pickup} → {i.delivery}
-                  </div>
-                </td>
-                <td className="py-3">{i.moveDate || "—"}</td>
-                <td className="py-3">
-                  <select
-                    value={i.status}
-                    onChange={(e) => updateStatus(i.id, e.target.value)}
-                    className="rounded-xl border px-3 py-2"
-                  >
-                    {STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </td>
+      {loading ? (
+        <div className="mt-4 text-slate-600">Loading…</div>
+      ) : (
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-slate-600">
+              <tr className="border-b">
+                <th className="py-3">Customer</th>
+                <th className="py-3">Route</th>
+                <th className="py-3">Move Date</th>
+                <th className="py-3">Status</th>
               </tr>
-            ))}
+            </thead>
 
-            {inquiries.length === 0 && (
-              <tr>
-                <td className="py-6 text-slate-600" colSpan={4}>
-                  No inquiries yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            <tbody>
+              {inquiries.map((i) => (
+                <tr key={i._id} className="border-b">
+                  <td className="py-3">
+                    <div className="font-medium text-slate-900">{i.name}</div>
+                    <div className="text-slate-600 text-xs">{i.phone}</div>
+                  </td>
+
+                  <td className="py-3">
+                    <div className="text-slate-900 font-medium">
+                      {i.pickup} → {i.delivery}
+                    </div>
+                  </td>
+
+                  <td className="py-3">{i.moveDate || "—"}</td>
+
+                  <td className="py-3">
+                    <select
+                      value={i.status || "NEW"}
+                      onChange={(e) => updateStatus(i._id, e.target.value)}
+                      className="rounded-xl border px-3 py-2"
+                    >
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+
+              {inquiries.length === 0 && (
+                <tr>
+                  <td className="py-6 text-slate-600" colSpan={4}>
+                    No inquiries yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </AdminShell>
   );
 }

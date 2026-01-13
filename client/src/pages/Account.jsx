@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
@@ -6,6 +7,8 @@ export default function Account() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +23,12 @@ export default function Account() {
 
     setTimeout(() => {
       setSaving(false);
-      alert("Logged in (mock). Next: connect backend + protect admin routes.");
+
+      // optional: remove this alert if you dislike it
+      // alert("Logged in (mock). Next: connect backend + protect admin routes.");
+
+      // Redirect to admin area (choose a route you definitely have)
+      navigate("/admin/areas", { replace: true });
     }, 400);
   };
 

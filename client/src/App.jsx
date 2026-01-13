@@ -16,7 +16,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AreasAdmin from "./pages/admin/AreasAdmin";
 import Dashboard from "./pages/admin/Dashboard";
-import InquiriesAdmin from "./pages/admin/InquiriesAdmin";
 
 export default function App() {
   return (
@@ -68,7 +67,6 @@ export default function App() {
         >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="areas" element={<AreasAdmin />} />
-          <Route path="inquiries" element={<InquiriesAdmin />} />
         </Route>
       </Routes>
     </BrowserRouter>

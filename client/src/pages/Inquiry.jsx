@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { addInquiry } from "../services/inquiriesStore";
+import { createInquiry } from "../services/inquiriesApi";
 
 export default function Inquiry() {
   const nav = useNavigate();
@@ -32,10 +32,11 @@ export default function Inquiry() {
       moveDate: p.hasDate ? "" : p.moveDate, // if switching to "No", clear date
     }));
   };
-  const onSubmit = (e) => {
+
+  const onSubmit = async (e) => {
     e.preventDefault();
 
-    addInquiry({
+    await createInquiry({
       moveType: form.moveType,
       name: form.name.trim(),
       phone: form.phone.trim(),
