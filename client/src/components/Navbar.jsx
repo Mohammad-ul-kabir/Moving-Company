@@ -39,7 +39,6 @@ export default function Navbar() {
               How It Works
             </NavLink>
 
-            {/* Customer account links */}
             {isLoggedIn ? (
               <>
                 <NavLink to="/my-requests" className={navLinkClass}>
@@ -59,11 +58,6 @@ export default function Navbar() {
                 </NavLink>
               </>
             )}
-
-            {/* Keep your old page if you still want it */}
-            <NavLink to="/account" className={navLinkClass}>
-              My Account
-            </NavLink>
           </nav>
         </div>
 

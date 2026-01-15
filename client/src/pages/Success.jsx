@@ -1,10 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { getCustomerAuth } from "../services/customerAuthApi";
 
 export default function Success() {
   const { state } = useLocation();
   const type = state?.type ?? "request";
+
+  const customer = getCustomerAuth();
+  const isLoggedIn = !!customer?.token;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -24,19 +28,45 @@ export default function Success() {
             >
               Back to Home
             </Link>
+
             <Link
               to="/service-areas"
               className="px-4 py-2 rounded-xl bg-slate-100 text-slate-900 font-semibold hover:bg-slate-200"
             >
               Check Service Areas
             </Link>
-            <Link
-              to="/admin/inquiries"
-              className="px-4 py-2 rounded-xl border font-semibold hover:bg-slate-50"
-            >
-              Admin: View Inquiries
-            </Link>
+
+            {isLoggedIn ? (
+              <Link
+                to="/my-requests"
+                className="px-4 py-2 rounded-xl border font-semibold hover:bg-slate-50"
+              >
+                View My Requests
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-xl border font-semibold hover:bg-slate-50"
+                >
+                  Login to track
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-2 rounded-xl border font-semibold hover:bg-slate-50"
+                >
+                  Create account
+                </Link>
+              </>
+            )}
           </div>
+
+          {!isLoggedIn && (
+            <div className="mt-4 text-sm text-slate-600">
+              Tip: Create an account to view status updates for your bookings
+              and inquiries.
+            </div>
+          )}
         </div>
       </main>
 

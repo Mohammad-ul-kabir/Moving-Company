@@ -25,11 +25,6 @@ export default function Footer() {
                   How it works
                 </a>
               </li>
-              <li>
-                <a className="hover:text-slate-900" href="/account">
-                  My account
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -50,14 +45,6 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col sm:flex-row gap-3 items-center justify-between text-sm text-slate-500">
           <div>© {new Date().getFullYear()} MovingCo. All rights reserved.</div>
-          <div className="flex gap-4">
-            <a className="hover:text-slate-700" href="#">
-              Privacy
-            </a>
-            <a className="hover:text-slate-700" href="#">
-              Terms
-            </a>
-          </div>
         </div>
       </div>
     </footer>
