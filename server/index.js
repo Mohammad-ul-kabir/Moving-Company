@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 import morgan from "morgan";
 import areasRouter from "./routes/areas.js";
+import bookingsRouter from "./routes/bookings.js";
 import inquiriesRouter from "./routes/inquiries.js";
 
 
@@ -17,6 +18,7 @@ const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
+app.use("/api/bookings", bookingsRouter);
 
 app.use("/api/areas", areasRouter);
 app.use("/api/inquiries", inquiriesRouter);

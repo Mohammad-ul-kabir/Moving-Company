@@ -91,14 +91,6 @@ export default function Areas() {
           Total: <span className="font-semibold">{stats.total}</span> • Active:{" "}
           <span className="font-semibold">{stats.active}</span>
         </div>
-
-        <button
-          onClick={load}
-          className="px-4 py-2 rounded-xl bg-slate-100 font-semibold hover:bg-slate-200"
-          type="button"
-        >
-          Reload
-        </button>
       </div>
 
       {error && (

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import { createBooking } from "../services/bookingApi";
+import { createBooking } from "../services/bookingsApi";
 
 export default function Book() {
   const nav = useNavigate();
@@ -21,18 +21,17 @@ export default function Book() {
 
   const update = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
 
-    createBooking({
+    await createBooking({
       moveType: form.moveType,
       name: form.name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
       pickup: form.pickup.trim(),
       delivery: form.delivery.trim(),
-      moveDate: form.moveDate,
-      timeWindow: form.timeWindow,
+      moveDate: form.hasDate ? form.moveDate : "",
       notes: form.notes.trim(),
     });
 

@@ -19,41 +19,39 @@ function Badge({ active }) {
 
 export default function ServiceAreas() {
   const [areas, setAreas] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // first load
   const [error, setError] = useState("");
 
   const [q, setQ] = useState("");
   const [showAll, setShowAll] = useState(false);
 
-  const load = async () => {
-    try {
-      setError("");
-      setLoading(true);
-
-      const data = await fetchServiceAreas({ all: showAll });
-      setAreas(Array.isArray(data) ? data : []);
-    } catch (e) {
-      setError(e?.message || "Failed to load areas");
-      setAreas([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    const onFocus = () => load();
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let cancelled = false;
+
+    fetchServiceAreas({ all: showAll })
+      .then((data) => {
+        if (cancelled) return;
+        setAreas(Array.isArray(data) ? data : []);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(e?.message || "Failed to load areas");
+        setAreas([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [showAll]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
 
     let list = areas;
-
-    // If API already returns active-only when showAll=false,
-    // this filter is harmless (keeps your UI behavior consistent)
     if (!showAll) list = list.filter((a) => a.isActive);
 
     if (!query) return list;
@@ -77,34 +75,27 @@ export default function ServiceAreas() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-              <input
-                type="checkbox"
-                className="h-4 w-4"
-                checked={showAll}
-                onChange={(e) => setShowAll(e.target.checked)}
-              />
-              Show inactive areas too
-            </label>
-
-            <button
-              onClick={load}
-              className="px-4 py-2 rounded-xl bg-slate-100 font-semibold hover:bg-slate-200"
-            >
-              Reload
-            </button>
-          </div>
+          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              className="h-4 w-4"
+              checked={showAll}
+              onChange={(e) => {
+                setError("");
+                setLoading(true);
+                setShowAll(e.target.checked);
+              }}
+            />
+            Show inactive areas too
+          </label>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
             {error}
           </div>
         )}
 
-        {/* Search */}
         <div className="mt-6 bg-white border rounded-2xl shadow-sm p-4">
           <input
             value={q}
@@ -117,7 +108,6 @@ export default function ServiceAreas() {
           </div>
         </div>
 
-        {/* Results */}
         <div className="mt-6">
           {loading ? (
             <div className="text-slate-600">Loading areas…</div>
