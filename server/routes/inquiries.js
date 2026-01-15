@@ -1,13 +1,35 @@
 import express from "express";
+import jwt from "jsonwebtoken";
 import requireAdmin from "../middleware/requireAdmin.js";
 import Inquiry from "../models/Inquiry.js";
 
 const router = express.Router();
 
+// Read optional customer token from Authorization header (does NOT require login)
+function getOptionalCustomerUserId(req) {
+  const auth = req.headers.authorization || "";
+  const [type, token] = auth.split(" ");
+
+  if (type !== "Bearer" || !token) return null;
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload?.role === "customer" && payload?.userId) return payload.userId;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // POST /api/inquiries (public)
+// If customer is logged in, attach userId automatically.
 router.post("/", async (req, res) => {
   try {
+    const userId = getOptionalCustomerUserId(req);
+
     const payload = {
+      userId: userId || null,
+
       moveType: req.body.moveType || "",
       name: String(req.body.name || "").trim(),
       phone: String(req.body.phone || "").trim(),
@@ -16,6 +38,7 @@ router.post("/", async (req, res) => {
       delivery: String(req.body.delivery || "").trim(),
       moveDate: req.body.moveDate || "",
       notes: String(req.body.notes || "").trim(),
+
       status: "NEW",
     };
 

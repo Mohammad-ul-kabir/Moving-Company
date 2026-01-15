@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequireCustomer from "./components/RequireCustomer";
 
 import Account from "./pages/Account";
 import Book from "./pages/Book";
@@ -9,6 +10,10 @@ import HowItWorks from "./pages/HowItWorks";
 import Inquiry from "./pages/Inquiry";
 import ServiceAreas from "./pages/ServiceAreas";
 import Success from "./pages/Success";
+
+import CustomerLogin from "./pages/CustomerLogin";
+import CustomerSignup from "./pages/CustomerSignup";
+import MyRequests from "./pages/MyRequests";
 
 import AdminLayout from "./pages/admin/AdminLayout";
 import Areas from "./pages/admin/Areas";
@@ -29,6 +34,18 @@ export default function App() {
         <Route path="/success" element={<Success />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/account" element={<Account />} />
+
+        {/* Customer auth */}
+        <Route path="/login" element={<CustomerLogin />} />
+        <Route path="/signup" element={<CustomerSignup />} />
+        <Route
+          path="/my-requests"
+          element={
+            <RequireCustomer>
+              <MyRequests />
+            </RequireCustomer>
+          }
+        />
 
         {/* Admin login (public) */}
         <Route path="/admin/login" element={<Login />} />

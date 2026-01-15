@@ -1,6 +1,9 @@
-import { Link, NavLink } from "react-router-dom";
-
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import logoImg from "../assets/blueline.jpg";
+import {
+  clearCustomerAuth,
+  getCustomerAuth,
+} from "../services/customerAuthApi";
 
 const navLinkClass = ({ isActive }) =>
   `inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition ${
@@ -8,12 +11,21 @@ const navLinkClass = ({ isActive }) =>
   }`;
 
 export default function Navbar() {
+  const nav = useNavigate();
+  const auth = getCustomerAuth();
+  const isLoggedIn = !!auth?.token;
+
+  const logout = () => {
+    clearCustomerAuth();
+    nav("/", { replace: true });
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="font-semibold text-slate-900">
-            <img alt="Moving illustration" src={logoImg} className=" h-auto" />
+            <img alt="Moving illustration" src={logoImg} className="h-auto" />
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -26,6 +38,29 @@ export default function Navbar() {
             <NavLink to="/how-it-works" className={navLinkClass}>
               How It Works
             </NavLink>
+
+            {/* Customer account links */}
+            {isLoggedIn ? (
+              <>
+                <NavLink to="/my-requests" className={navLinkClass}>
+                  My Requests
+                </NavLink>
+                <button onClick={logout} className={navLinkClass} type="button">
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink to="/login" className={navLinkClass}>
+                  Login
+                </NavLink>
+                <NavLink to="/signup" className={navLinkClass}>
+                  Sign up
+                </NavLink>
+              </>
+            )}
+
+            {/* Keep your old page if you still want it */}
             <NavLink to="/account" className={navLinkClass}>
               My Account
             </NavLink>

@@ -5,8 +5,14 @@ import mongoose from "mongoose";
 import morgan from "morgan";
 import adminRouter from "./routes/admin.js";
 import areasRouter from "./routes/areas.js";
+import authRouter from "./routes/auth.js";
 import bookingsRouter from "./routes/bookings.js";
 import inquiriesRouter from "./routes/inquiries.js";
+import meRouter from "./routes/me.js";
+
+
+
+
 
 
 
@@ -26,6 +32,9 @@ app.use("/api/inquiries", inquiriesRouter);
 
 
 app.use("/api/admin", adminRouter);
+
+app.use("/api/auth", authRouter);
+app.use("/api/me", meRouter);
 
 
 

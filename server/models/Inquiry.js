@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 
 const inquirySchema = new mongoose.Schema(
   {
+    // If customer is logged in, we attach userId. If not, it stays null.
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     moveType: { type: String, required: true, trim: true },
     name: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true },

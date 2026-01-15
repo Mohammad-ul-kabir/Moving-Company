@@ -1,4 +1,5 @@
 import { authHeaders } from "./authApi";
+import { customerAuthHeaders } from "./customerAuthApi";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -12,20 +13,19 @@ async function request(path, options = {}) {
     throw new Error(`HTTP ${res.status}: ${txt}`);
   }
 
-  // endpoints return JSON
   return res.json();
 }
 
-// Customer: create inquiry (public)
+// Customer: create inquiry (guest OR logged-in customer)
 export function createInquiry(payload) {
   return request("/api/inquiries", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: customerAuthHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
 }
 
-// Admin: list inquiries (requires JWT)
+// Admin: list inquiries (requires admin JWT)
 export function listInquiries() {
   return request(`/api/inquiries?t=${Date.now()}`, {
     method: "GET",
@@ -34,7 +34,7 @@ export function listInquiries() {
   });
 }
 
-// Admin: update inquiry (requires JWT)
+// Admin: update inquiry (requires admin JWT)
 export function patchInquiry(id, patch) {
   return request(`/api/inquiries/${id}`, {
     method: "PATCH",
