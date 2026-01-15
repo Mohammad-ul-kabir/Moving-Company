@@ -1,6 +1,8 @@
+import { authHeaders } from "./authApi";
+
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// Customer: create a booking
+// Customer: create a booking (public)
 export async function createBooking(payload) {
   const res = await fetch(`${API}/api/bookings`, {
     method: "POST",
@@ -16,11 +18,12 @@ export async function createBooking(payload) {
   return res.json();
 }
 
-// Admin: list bookings
+// Admin: list bookings (requires JWT)
 export async function listBookings() {
   const res = await fetch(`${API}/api/bookings?t=${Date.now()}`, {
     method: "GET",
     cache: "no-store",
+    headers: authHeaders(),
   });
 
   if (!res.ok) {
@@ -31,11 +34,11 @@ export async function listBookings() {
   return res.json();
 }
 
-// Admin: update booking status
+// Admin: update booking status (requires JWT)
 export async function updateBookingStatus(id, status) {
   const res = await fetch(`${API}/api/bookings/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ status }),
   });
 

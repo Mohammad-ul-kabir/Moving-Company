@@ -1,16 +1,23 @@
+import { authHeaders } from "./authApi";
+
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 /**
  * Customer page
- * - all=false => backend returns active only
- * - all=true  => backend returns all (active + inactive)
+ * - all=false => public (active only)
+ * - all=true  => admin-only (requires JWT)
  */
 export async function fetchServiceAreas({ all = false } = {}) {
   const url = all
     ? `${API}/api/areas?all=true&t=${Date.now()}`
     : `${API}/api/areas?t=${Date.now()}`;
 
-  const res = await fetch(url, { method: "GET", cache: "no-store" });
+  const res = await fetch(url, {
+    method: "GET",
+    cache: "no-store",
+    // only send auth header when asking for all areas (admin-only)
+    headers: all ? authHeaders() : undefined,
+  });
 
   if (!res.ok) {
     const txt = await res.text();
@@ -20,16 +27,16 @@ export async function fetchServiceAreas({ all = false } = {}) {
   return res.json();
 }
 
-/** Admin: list all areas */
+/** Admin: list all areas (requires JWT) */
 export async function fetchAllAreas() {
   return fetchServiceAreas({ all: true });
 }
 
-/** Admin: create */
+/** Admin: create (requires JWT) */
 export async function createArea(payload) {
   const res = await fetch(`${API}/api/areas`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
 
@@ -41,11 +48,11 @@ export async function createArea(payload) {
   return res.json();
 }
 
-/** Admin: update */
+/** Admin: update (requires JWT) */
 export async function updateArea(id, patch) {
   const res = await fetch(`${API}/api/areas/${id}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(patch),
   });
 
@@ -57,10 +64,11 @@ export async function updateArea(id, patch) {
   return res.json();
 }
 
-/** Admin: delete */
+/** Admin: delete (requires JWT) */
 export async function removeArea(id) {
   const res = await fetch(`${API}/api/areas/${id}`, {
     method: "DELETE",
+    headers: authHeaders(),
   });
 
   if (!res.ok) {

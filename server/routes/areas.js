@@ -1,75 +1,102 @@
 import express from "express";
+import jwt from "jsonwebtoken";
+import requireAdmin from "../middleware/requireAdmin.js";
 import Area from "../models/Area.js";
 
 const router = express.Router();
 
-/**
- * GET /api/areas
- * Customer use: returns only active areas by default.
- * Optional: ?all=true returns all (admin use for now).
- */
+// Read admin token (optional) so we can protect "?all=true"
+function getAdminPayload(req) {
+  const auth = req.headers.authorization || "";
+  const parts = auth.split(" ");
+  const token = parts.length === 2 && parts[0] === "Bearer" ? parts[1] : "";
+  if (!token) return null;
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    if (payload?.role !== "admin") return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// GET /api/areas
+// - default: active only
+// - if ?all=true => admin only
 router.get("/", async (req, res) => {
   try {
-    const all = req.query.all === "true";
-    const filter = all ? {} : { isActive: true };
+    const wantsAll = String(req.query.all || "") === "true";
 
-    const areas = await Area.find(filter).sort({ createdAt: -1 });
-    res.json(areas);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (wantsAll) {
+      const admin = getAdminPayload(req);
+      if (!admin) return res.status(401).send("Missing/invalid admin token");
+      const items = await Area.find().sort({ createdAt: -1 });
+      return res.json(items);
+    }
+
+    const items = await Area.find({ isActive: true }).sort({ createdAt: -1 });
+    res.json(items);
+  } catch (e) {
+    res.status(500).send(e.message || "Server error");
   }
 });
 
-/**
- * POST /api/areas
- * Create a new area (admin use)
- */
-router.post("/", async (req, res) => {
+// POST /api/areas (admin)
+router.post("/", requireAdmin, async (req, res) => {
   try {
-    const { city, area, postcode, isActive } = req.body;
+    const city = String(req.body.city || "").trim();
+    const area = String(req.body.area || "").trim();
+    const postcode = String(req.body.postcode || "").trim().toUpperCase();
+    const isActive = req.body.isActive !== false;
 
-    const doc = await Area.create({
+    if (!city || !postcode) {
+      return res.status(400).send("city and postcode are required");
+    }
+
+    const created = await Area.create({
       city,
-      area,
+      area: area || postcode, // fallback if you don't send area
       postcode,
-      isActive: isActive ?? true,
+      isActive,
     });
 
-    res.status(201).json(doc);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(201).json(created);
+  } catch (e) {
+    res.status(500).send(e.message || "Server error");
   }
 });
 
-/**
- * PATCH /api/areas/:id
- * Update area (admin use)
- */
-router.patch("/:id", async (req, res) => {
+// PATCH /api/areas/:id (admin)
+router.patch("/:id", requireAdmin, async (req, res) => {
   try {
-    const updated = await Area.findByIdAndUpdate(req.params.id, req.body, {
+    const patch = {};
+
+    if (typeof req.body.city === "string") patch.city = req.body.city.trim();
+    if (typeof req.body.area === "string") patch.area = req.body.area.trim();
+    if (typeof req.body.postcode === "string")
+      patch.postcode = req.body.postcode.trim().toUpperCase();
+    if (typeof req.body.isActive === "boolean") patch.isActive = req.body.isActive;
+
+    const updated = await Area.findByIdAndUpdate(req.params.id, patch, {
       new: true,
-      runValidators: true,
     });
 
-    if (!updated) return res.status(404).json({ message: "Area not found" });
+    if (!updated) return res.status(404).send("Not found");
     res.json(updated);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (e) {
+    res.status(500).send(e.message || "Server error");
   }
 });
 
-/**
- * DELETE /api/areas/:id
- * Delete area (admin use)
- */
-router.delete("/:id", async (req, res) => {
+// DELETE /api/areas/:id (admin)
+router.delete("/:id", requireAdmin, async (req, res) => {
   try {
     const deleted = await Area.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Area not found" });
+    if (!deleted) return res.status(404).send("Not found");
     res.json({ ok: true });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+  } catch (e) {
+    res.status(500).send(e.message || "Server error");
   }
 });
 

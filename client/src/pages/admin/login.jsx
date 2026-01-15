@@ -16,11 +16,12 @@ export default function AdminLogin() {
     e.preventDefault();
     setErr("");
     setLoading(true);
+
     try {
-      await adminLogin(email, password);
+      await adminLogin(email, password); // backend JWT login (saves token in localStorage)
       nav(from, { replace: true });
-    } catch (e) {
-      setErr(e?.message || "Login failed");
+    } catch (e2) {
+      setErr(e2?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -31,7 +32,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-md bg-white border rounded-2xl shadow-sm p-6">
         <h1 className="text-2xl font-bold text-slate-900">Admin Login</h1>
         <p className="text-slate-600 mt-2 text-sm">
-          Sign in to manage service areas and inquiries.
+          Sign in to manage service areas, inquiries, and bookings.
         </p>
 
         {err && (
@@ -49,7 +50,8 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="admin@movingco.com"
+              placeholder="admin@example.com"
+              autoComplete="username"
             />
           </div>
 
@@ -64,6 +66,7 @@ export default function AdminLogin() {
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
+              autoComplete="current-password"
             />
           </div>
 
@@ -75,7 +78,8 @@ export default function AdminLogin() {
           </button>
 
           <div className="text-xs text-slate-500">
-            (Mock auth for now) Later we’ll connect this to backend JWT login.
+            This uses backend JWT login. If you changed
+            ADMIN_EMAIL/ADMIN_PASSWORD in server .env, use those here.
           </div>
         </form>
       </div>

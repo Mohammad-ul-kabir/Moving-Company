@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminShell from "../../components/admin/AdminShell";
 import {
   createArea,
@@ -6,14 +7,27 @@ import {
   removeArea,
   updateArea,
 } from "../../services/areasApi";
+import { clearAdminAuth } from "../../services/authApi";
 
 export default function Areas() {
+  const nav = useNavigate();
+
   const [city, setCity] = useState("");
   const [postcode, setPostcode] = useState("");
 
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleAuthError = (e, from = "/admin/areas") => {
+    const msg = String(e?.message || "");
+    if (msg.includes("HTTP 401")) {
+      clearAdminAuth();
+      nav("/admin/login", { replace: true, state: { from } });
+      return true;
+    }
+    return false;
+  };
 
   const load = async () => {
     try {
@@ -22,6 +36,7 @@ export default function Areas() {
       const data = await fetchAllAreas();
       setAreas(Array.isArray(data) ? data : []);
     } catch (e) {
+      if (handleAuthError(e)) return;
       setError(e?.message || "Failed to load areas");
       setAreas([]);
     } finally {
@@ -31,6 +46,7 @@ export default function Areas() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addArea = async (e) => {
@@ -41,10 +57,11 @@ export default function Areas() {
 
     try {
       setError("");
+
       await createArea({
         city: c,
-        area: p, // using same value for "area"
-        postcode: p, // and postcode (matches your old UI)
+        area: p, // keeping your old UI behavior
+        postcode: p,
         isActive: true,
       });
 
@@ -52,6 +69,7 @@ export default function Areas() {
       setPostcode("");
       await load();
     } catch (e2) {
+      if (handleAuthError(e2)) return;
       setError(e2?.message || "Failed to add area");
     }
   };
@@ -65,6 +83,7 @@ export default function Areas() {
       await updateArea(id, { isActive: !current.isActive });
       await load();
     } catch (e) {
+      if (handleAuthError(e)) return;
       setError(e?.message || "Failed to update");
     }
   };
@@ -75,6 +94,7 @@ export default function Areas() {
       await removeArea(id);
       await load();
     } catch (e) {
+      if (handleAuthError(e)) return;
       setError(e?.message || "Failed to delete");
     }
   };

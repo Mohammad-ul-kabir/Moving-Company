@@ -6,9 +6,8 @@ export default function ProtectedRoute({ children }) {
   const auth = getAdminAuth();
 
   if (!auth?.token) {
-    return (
-      <Navigate to="/admin/login" state={{ from: location.pathname }} replace />
-    );
+    const from = location.pathname + (location.search || "");
+    return <Navigate to="/admin/login" state={{ from }} replace />;
   }
 
   return children;

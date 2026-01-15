@@ -1,34 +1,37 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminShell from "../../components/admin/AdminShell";
+import { clearAdminAuth } from "../../services/authApi";
+import { listInquiries, patchInquiry } from "../../services/inquiriesApi";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const STATUSES = ["NEW", "QUOTED", "BOOKED", "CLOSED"];
 
 export default function Inquiries() {
+  const nav = useNavigate();
+
   const [inquiries, setInquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleAuthError = (e, from = "/admin/inquiries") => {
+    const msg = String(e?.message || "");
+    if (msg.includes("HTTP 401")) {
+      clearAdminAuth();
+      nav("/admin/login", { replace: true, state: { from } });
+      return true;
+    }
+    return false;
+  };
 
   const load = async () => {
     try {
       setError("");
       setLoading(true);
-
-      const res = await fetch(`${API}/api/inquiries?t=${Date.now()}`, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(`HTTP ${res.status}: ${txt}`);
-      }
-
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : [];
-      setInquiries(list);
+      const data = await listInquiries();
+      setInquiries(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || "Failed to load inquiries");
+      if (handleAuthError(e)) return;
+      setError(e?.message || "Failed to load inquiries");
       setInquiries([]);
     } finally {
       setLoading(false);
@@ -37,15 +40,17 @@ export default function Inquiries() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateStatus = async (id, status) => {
-    await fetch(`${API}/api/inquiries/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    await load();
+    try {
+      await patchInquiry(id, { status });
+      await load();
+    } catch (e) {
+      if (handleAuthError(e)) return;
+      setError(e?.message || "Failed to update inquiry");
+    }
   };
 
   return (

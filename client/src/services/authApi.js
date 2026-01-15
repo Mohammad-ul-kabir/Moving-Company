@@ -1,5 +1,12 @@
 const KEY = "mc_admin_auth";
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+// Save token in localStorage
+function save(auth) {
+  localStorage.setItem(KEY, JSON.stringify(auth));
+}
+
+// Read token from localStorage
 export function getAdminAuth() {
   try {
     const raw = localStorage.getItem(KEY);
@@ -9,24 +16,33 @@ export function getAdminAuth() {
   }
 }
 
-export function setAdminAuth(auth) {
-  localStorage.setItem(KEY, JSON.stringify(auth));
-}
-
+// Clear token
 export function clearAdminAuth() {
   localStorage.removeItem(KEY);
 }
 
-// MOCK login for now (replace with backend later)
+// Backend login -> store token
 export async function adminLogin(email, password) {
-  // simple check to simulate login
-  if (!email || !password) throw new Error("Email and password required");
+  const res = await fetch(`${API}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
 
-  // optional: restrict to one admin email during demo
-  // if (email !== "admin@movingco.com") throw new Error("Not an admin");
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`HTTP ${res.status}: ${txt}`);
+  }
 
-  const token = crypto.randomUUID();
-  const auth = { token, email, loggedInAt: Date.now() };
-  setAdminAuth(auth);
-  return auth;
+  const data = await res.json(); // { token, email }
+  save({ token: data.token, email: data.email, loggedInAt: Date.now() });
+  return data;
+}
+
+// Helper: add Authorization header
+export function authHeaders(extra = {}) {
+  const auth = getAdminAuth();
+  return auth?.token
+    ? { ...extra, Authorization: `Bearer ${auth.token}` }
+    : extra;
 }

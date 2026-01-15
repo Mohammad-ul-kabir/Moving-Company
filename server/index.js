@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import morgan from "morgan";
+import adminRouter from "./routes/admin.js";
 import areasRouter from "./routes/areas.js";
 import bookingsRouter from "./routes/bookings.js";
 import inquiriesRouter from "./routes/inquiries.js";
@@ -22,6 +23,9 @@ app.use("/api/bookings", bookingsRouter);
 
 app.use("/api/areas", areasRouter);
 app.use("/api/inquiries", inquiriesRouter);
+
+
+app.use("/api/admin", adminRouter);
 
 
 

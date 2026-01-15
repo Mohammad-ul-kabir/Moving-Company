@@ -1,13 +1,30 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminShell from "../../components/admin/AdminShell";
+import { clearAdminAuth } from "../../services/authApi";
 import { listBookings, updateBookingStatus } from "../../services/bookingsApi";
 
 const STATUSES = ["NEW", "CONFIRMED", "COMPLETED", "CANCELLED"];
 
 export default function Bookings() {
+  const nav = useNavigate();
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const handleAuthError = (e) => {
+    const msg = String(e?.message || "");
+    if (msg.includes("HTTP 401")) {
+      clearAdminAuth(); // remove bad/expired token
+      nav("/admin/login", {
+        replace: true,
+        state: { from: "/admin/bookings" },
+      });
+      return true;
+    }
+    return false;
+  };
 
   const load = async () => {
     try {
@@ -16,7 +33,8 @@ export default function Bookings() {
       const data = await listBookings();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || "Failed to load bookings");
+      if (handleAuthError(e)) return;
+      setError(e?.message || "Failed to load bookings");
       setItems([]);
     } finally {
       setLoading(false);
@@ -25,11 +43,17 @@ export default function Bookings() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setStatus = async (id, status) => {
-    await updateBookingStatus(id, status);
-    await load();
+    try {
+      await updateBookingStatus(id, status);
+      await load();
+    } catch (e) {
+      if (handleAuthError(e)) return;
+      setError(e?.message || "Failed to update booking");
+    }
   };
 
   return (
@@ -67,6 +91,7 @@ export default function Bookings() {
                   <th className="text-left p-3">Status</th>
                 </tr>
               </thead>
+
               <tbody>
                 {items.map((x) => (
                   <tr key={x._id} className="border-t">
