@@ -20,7 +20,7 @@ import Areas from "./pages/admin/AreasList";
 
 import Bookings from "./pages/admin/Bookings";
 import Dashboard from "./pages/admin/Dashboard";
-import Inquiries from "./pages/admin/Inquiries";
+import Inquiries from "./pages/admin/InquiriesList";
 import Login from "./pages/admin/Login";
 
 export default function App() {
