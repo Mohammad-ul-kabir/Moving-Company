@@ -182,10 +182,6 @@ export default function Book() {
             <button className="mt-5 w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
               Confirm Booking
             </button>
-
-            <p className="text-xs text-slate-500 mt-3">
-              After booking, it will appear in Admin → Bookings.
-            </p>
           </form>
         </div>
       </main>
