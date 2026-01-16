@@ -14,10 +14,8 @@ import Success from "./pages/Success";
 import CustomerLogin from "./pages/CustomerLogin";
 import CustomerSignup from "./pages/CustomerSignup";
 import MyRequests from "./pages/MyRequests";
-
 import AdminLayout from "./pages/admin/AdminLayout";
 import Areas from "./pages/admin/AreasList";
-
 import Bookings from "./pages/admin/Bookings";
 import Dashboard from "./pages/admin/Dashboard";
 import Inquiries from "./pages/admin/InquiriesList";
