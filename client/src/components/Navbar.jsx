@@ -35,6 +35,9 @@ export default function Navbar() {
             <NavLink to="/service-areas" className={navLinkClass}>
               Service Areas
             </NavLink>
+            <NavLink to="/book" className={navLinkClass}>
+              book
+            </NavLink>
             <NavLink to="/how-it-works" className={navLinkClass}>
               How It Works
             </NavLink>
